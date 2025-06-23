@@ -1,4 +1,4 @@
-import { Component } from '@/app/pccomponents/page'
+import { Component } from '@/app/(main)/pccomponents/page'
 import Image from 'next/image'
 import React from 'react'
 

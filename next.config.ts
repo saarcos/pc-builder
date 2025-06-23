@@ -2,7 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['coretms.tecnomegastore.ec'],
+    remotePatterns: [{
+      protocol: 'https',
+      hostname: 'coretms.tecnomegastore.ec',
+    }]
   },
 };
 
