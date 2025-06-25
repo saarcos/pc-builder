@@ -1,10 +1,14 @@
 import { getDb } from "@/lib/mongodb"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
         const db = await getDb();
-        const components = await db.collection('components').find({}).toArray();
+        const { searchParams } = new URL(req.url);
+        const componentType = searchParams.get('componentType');
+
+        const query = componentType ? {componentType} : {};
+        const components = await db.collection('components').find(query).toArray();
         return NextResponse.json(components);
     } catch (error) {
         console.error('Error al obtener productos:', error)

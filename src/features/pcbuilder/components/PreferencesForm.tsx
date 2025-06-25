@@ -61,7 +61,7 @@ export default function PreferencesForm() {
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className='font-inter flex flex-col gap-6'
+                className='font-inter flex flex-col gap-6 font-inter'
             >
                 <div className="start-form-child">
                     <FormField
