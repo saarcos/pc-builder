@@ -1,18 +1,50 @@
 "use client"
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import { navLinks } from "../../constants"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
-
+import { ScrollTrigger } from "gsap/all"
+import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
+gsap.registerPlugin(ScrollTrigger);
 export default function Navbar() {
   const pathname = usePathname()
   const isActive = (path: string) => path === pathname
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
+  const navbarRef = useRef(null);
+  useGSAP(() => {
+    const nav = navbarRef.current;
 
+    ScrollTrigger.create({
+      trigger: nav,
+      start: 'bottom top',
+      end: 99999,
+      onUpdate: (self) => {
+        if (self.direction === 1 && self.scroll() > 50) {
+          gsap.to(nav, {
+            backgroundColor: '#0f0f0fbb',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+            duration: 0.01,
+            ease: 'power1.out',
+          });
+        } else {
+          gsap.to(nav, {
+            backgroundColor: 'transparent',
+            boxShadow: '0 0 0 rgba(0, 0, 0, 0)',
+            duration: 0.01,
+            ease: 'power2.out',
+          });
+        }
+      },
+    });
+  }, []);
   return (
-    <nav className="fixed top-0 w-full z-50 bg-transparent backdrop-blur-md px-6 sm:px-10 py-4">
+    <nav
+      ref={navbarRef}
+      className="fixed top-0 w-full z-50 px-6 sm:px-10 py-4 backdrop-blur-md transition duration-300"
+    >
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         <Link
           href="/"
@@ -77,7 +109,7 @@ export default function Navbar() {
               </Link>
             ))}
             <SignedOut>
-              <SignInButton mode="modal">
+              <SignInButton>
                 <button className="mt-2 w-full border border-white text-white text-sm py-2 rounded-md transition hover:bg-white hover:text-black">
                   Iniciar sesión
                 </button>

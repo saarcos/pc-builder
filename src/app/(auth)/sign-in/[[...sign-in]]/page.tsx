@@ -34,6 +34,7 @@ export default function SignInPage() {
                     </svg>
                     Iniciar con Google
                 </Clerk.Connection>
+
                 <Clerk.Field name="identifier" className="group/field relative">
                     <Clerk.Label className="absolute left-2 top-0 -translate-y-1/2 bg-emerald-900 px-2 text-white before:absolute before:inset-0 before:-z-10 before:bg-black/50 group-focus-within/field:text-emerald-300 group-data-[invalid]/field:text-rose-400 font-pressstart text-[10px]">
                         Correo electrónico
@@ -60,7 +61,8 @@ export default function SignInPage() {
                     submit
                     className="font-inter cursor-pointer relative isolate w-full rounded-lg bg-gradient-to-b from-emerald-400 to-emerald-500 px-3.5 py-2.5 text-center text-sm font-medium text-black shadow-[0_1px_0_0_theme(colors.white/30%)_inset,0_-1px_1px_0_theme(colors.black/5%)_inset] outline-none before:absolute before:inset-0 before:-z-10 before:rounded-lg before:bg-white/10 before:opacity-0 hover:before:opacity-100 focus-visible:outline-[1.5px] focus-visible:outline-offset-2 focus-visible:outline-white active:text-emerald-900/80 active:before:bg-black/10"
                 >
-                    Iniciar sesión
+                    <Clerk.Loading>{(isLoading) => (isLoading ? 'Cargando...' : 'Iniciar sesión')}</Clerk.Loading>
+                    
                 </SignIn.Action>
                 <p className="text-center text-sm text-white/60 font-inter">
                     ¿No tienes una cuenta?{' '}
@@ -99,15 +101,18 @@ export default function SignInPage() {
                     </header>
                     <Clerk.GlobalError className="block text-sm text-red-600" />
                     <Clerk.Field name="code">
-                        <Clerk.Label className="sr-only">Inserta el código</Clerk.Label>
+                        <Clerk.Label className="absolute left-2 top-0 -translate-y-1/2 bg-emerald-900 px-2 text-white before:absolute before:inset-0 before:-z-10 before:bg-black/50 group-focus-within/field:text-emerald-300 group-data-[invalid]/field:text-rose-400 font-pressstart text-[10px]">
+                            Código
+                        </Clerk.Label>
                         <Clerk.Input
                             type="otp"
                             required
                             placeholder="Email code"
-                            className="w-full border-b border-neutral-200 bg-white pb-2 text-sm/6 text-neutral-950 outline-none placeholder:text-neutral-400 hover:border-neutral-300 focus:border-neutral-600 data-[invalid]:border-red-600 data-[invalid]:text-red-600"
+                            className="w-full rounded-lg bg-transparent px-4 py-2.5 text-sm text-white outline-none ring-1 ring-inset ring-white/20 hover:ring-white/30 focus:shadow-[0_0_6px_0] focus:shadow-emerald-500/20 focus:ring-[1.5px] focus:ring-emerald-300 data-[invalid]:shadow-rose-400/20 data-[invalid]:ring-rose-400"
                         />
                         <Clerk.FieldError className="mt-2 block text-xs text-red-600" />
                     </Clerk.Field>
+
                     <SignIn.Action
                         submit
                         className="relative w-full rounded-md bg-neutral-600 bg-gradient-to-b from-neutral-500 to-neutral-600 py-1.5 text-sm text-white shadow-[0_1px_1px_0_theme(colors.white/10%)_inset,0_1px_2.5px_0_theme(colors.black/36%)] outline-none ring-1 ring-inset ring-neutral-600 before:absolute before:inset-0 before:rounded-md before:bg-white/10 before:opacity-0 hover:before:opacity-100 focus-visible:outline-offset-2 focus-visible:outline-neutral-600 active:bg-neutral-600 active:text-white/60 active:before:opacity-0"
@@ -126,5 +131,6 @@ export default function SignInPage() {
                 </p>
             </SignIn.Step>
         </SignIn.Root>
+        <div id="clerk-captcha" data-cl-theme="dark" data-cl-size="flexible" data-cl-language="es-ES" />
     </div>
 }

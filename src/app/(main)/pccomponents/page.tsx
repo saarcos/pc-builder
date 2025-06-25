@@ -46,7 +46,7 @@ export default function Components() {
   }, [loading]);
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-black text-white">
+      <div className="h-screen flex items-center justify-center text-white">
         <div className="flex flex-col items-center gap-4" ref={loaderRef}>
           <Cog className="w-24 h-24 animate-spin text-emerald-500 drop-shadow-[0_0_15px_#22c55e]" />
           <p className="text-xl font-bold animate-pulse text-emerald-400 text-center">Cargando componentes...</p>
@@ -55,10 +55,10 @@ export default function Components() {
     );
   }
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-20 px-4">
+    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 px-4">
       {components && components.length > 0 ? components.map((component) => (
         <ComponentCard key={component._id} component={component} />
-      )) : <h1>No components available</h1>}
+      )) : null}
     </div>
   )
 }

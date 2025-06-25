@@ -5,9 +5,9 @@ export const navLinks = [
         path: '/'
     },
     {
-        id:'products',
-        title: 'Componentes',
-        path: '/pccomponents'
+        id: 'builder',
+        title: 'Arma tu PC',
+        path: '/builder'
     },
     {
         id: 'builds',
@@ -15,9 +15,8 @@ export const navLinks = [
         path: '/builds'
     },
     {
-        id: 'builder',
-        title: 'Arma tu PC',
-        path: '/builder'
+        id: 'products',
+        title: 'Componentes',
+        path: '/pccomponents'
     },
-
 ]
