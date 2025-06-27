@@ -1,7 +1,55 @@
-import React from 'react'
+"use client"
+import React, { useEffect, useState } from 'react'
 import ComponentContainer from './lock-components/ComponentContainer'
+import { Button } from '@/components/ui/button';
+import { Item, LockedComponents } from '@/app/types/pc-builder';
+import { usePcBuilderStore } from '@/app/(main)/builder/store';
+import { pcbuilderSchema } from '../schema';
+import { usePCBuilderData } from '@/hooks/usePcBuilderData';
+import { useRouter } from 'next/navigation';
+
 
 export default function LockForm() {
+    const router = useRouter();
+    const setData = usePcBuilderStore((state) => state.setData);
+    const {
+        usage,
+        budget,
+        preferredCPUBrand,
+        preferredGPUBrand,
+        preferredStorage,
+        storageRequirement,
+    } = usePCBuilderData();
+    useEffect(() => {
+        if (!usePcBuilderStore.persist.hasHydrated()) {
+            return
+        }
+        if (!usage || !budget || !preferredCPUBrand || !preferredGPUBrand || !preferredStorage || !storageRequirement) {
+            router.push('/builder/start')
+        }
+    }, [usage, budget, preferredCPUBrand, preferredGPUBrand, preferredStorage, storageRequirement, router])
+    const [lockedComponents, setLockedComponents] = useState<LockedComponents>({});
+    const lockedSchema = pcbuilderSchema.pick({ lockedComponents: true });
+
+    const handleSelect = (type: keyof LockedComponents, component: Item) => {
+        setLockedComponents(prev => ({ ...prev, [type]: component }));
+    }
+    const handleDeleteComponent = (type: keyof LockedComponents) => {
+        setLockedComponents(prev => {
+            const updated = { ...prev };
+            delete updated[type];
+            return updated;
+        });
+    };
+    const onSubmit = () => {
+        try {
+            const parsed = lockedSchema.parse({ lockedComponents });
+            setData(parsed);
+            console.log({ budget, preferredCPUBrand, lockedComponents })
+        } catch (e) {
+            console.error("Errores de validación:", e);
+        }
+    }
     return (
         <div className='font-inter text-white'>
             <h1 className='text-center text-2xl sm:text-3xl font-pressstart mb-4 drop-shadow-[0_0_5px_#00ffcc]'>
@@ -16,9 +64,17 @@ export default function LockForm() {
                 <div className='p-4 border-b border-emerald-600/30 font-semibold text-emerald-300 tracking-wide'>
                     Componentes a fijar
                 </div>
-                {[{ name: 'cpu', componentType: 'processors' }, { name: 'gpu', componentType: 'video-cards' }, { name: 'motherboard', componentType: 'motherboards' }].map((component, index) => (
-                    <ComponentContainer key={index} component={component} />
+                {[{ name: 'cpu', componentType: 'processors' }, { name: 'gpu', componentType: 'video-cards' }, { name: 'motherboard', componentType: 'motherboards' }, { name: 'storage', componentType: 'hard-drives' }].map((component, index) => (
+                    <ComponentContainer key={index} component={component} onSelect={handleSelect} onDelete={handleDeleteComponent} lockedValue={lockedComponents[component.name as keyof LockedComponents]} />
                 ))}
+            </div>
+            <div className='flex items-center justify-center mt-5 start-form-child'>
+                <Button
+                    onClick={onSubmit}
+                    className='px-8 py-5 cursor-pointer bg-transparent border-2 border-emerald-400 shadow-[0px_0px_5px_#22c55e] hover:shadow-[0px_0px_10px_#22c55e] hover:bg-transparent font-pressstart'
+                >
+                    Siguiente
+                </Button>
             </div>
         </div>
     )

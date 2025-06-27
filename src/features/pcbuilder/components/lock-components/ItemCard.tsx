@@ -1,11 +1,23 @@
 import React from 'react'
-import { Item } from './ComponentContainer'
 import Image from 'next/image'
-import { Plus } from 'lucide-react'
+import { Plus, Check } from 'lucide-react'
+import { Item } from '@/app/types/pc-builder';
 
-export default function ItemCard({ item }: { item: Item }) {
+type Props = {
+    item: Item,
+    onSelect: (type: "cpu" | "gpu" | "ram" | "storage" | "motherboard", component: Item) => void;
+    componentName: "cpu" | "gpu" | "ram" | "storage" | "motherboard";
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    isLocked: boolean,
+}
+
+export default function ItemCard({ item, onSelect, componentName, setOpen, isLocked }: Props) {
     return (
-        <div className='flex flex-col bg-emerald-950/40 border border-emerald-500/20 p-3 rounded-xl text-white shadow-md hover:shadow-emerald-500/10 transition-shadow'>
+        <div className={`flex flex-col p-3 rounded-xl text-white shadow-md transition-shadow
+            ${isLocked
+                ? 'border border-emerald-400/60 bg-emerald-900/40 shadow-emerald-500/20 scale-105'
+                : 'border border-emerald-500/20 bg-emerald-950/40 hover:shadow-emerald-500/10'
+            }`}>
             <div className="relative w-full aspect-[4/3] bg-black/40 rounded overflow-hidden">
                 <Image
                     src={item.image}
@@ -29,9 +41,22 @@ export default function ItemCard({ item }: { item: Item }) {
                 </a>
             </div>
 
-            <button className='cursor-pointer mt-3 flex items-center justify-center gap-1 bg-emerald-700 hover:bg-emerald-600 text-white text-sm px-3 py-1.5 rounded-md transition-colors w-full text-center'>
-                <Plus className='w-4 h-4' />
-                <span>Añadir</span>
+            <button
+                onClick={() => {
+                    if (!isLocked) {
+                        onSelect(componentName, item);
+                        setOpen(false);
+                    }
+                }}
+                disabled={isLocked}
+                className={`mt-3 flex items-center justify-center gap-1 text-sm px-3 py-1.5 rounded-md w-full text-center transition-colors
+                    ${isLocked
+                        ? 'bg-emerald-800 text-emerald-300 cursor-default'
+                        : 'bg-emerald-700 hover:bg-emerald-600 text-white cursor-pointer'
+                    }`}
+            >
+                {isLocked ? <Check className='w-4 h-4' /> : <Plus className='w-4 h-4' />}
+                <span>{isLocked ? 'Añadido' : 'Añadir'}</span>
             </button>
         </div>
     )

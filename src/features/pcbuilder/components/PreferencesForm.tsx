@@ -1,7 +1,7 @@
 "use client"
 import { Button } from '@/components/ui/button'
 import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -12,8 +12,14 @@ import { Slider } from '@/components/ui/slider'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/all'
 import { useGSAP } from '@gsap/react'
+import { usePcBuilderStore } from '@/app/(main)/builder/store'
+import { usePCBuilderData } from '@/hooks/usePcBuilderData'
 gsap.registerPlugin(ScrollTrigger);
 export default function PreferencesForm() {
+    const setData = usePcBuilderStore((state) => state.setData);
+    const { preferredCPUBrand, preferredGPUBrand, preferredStorage} = usePCBuilderData();
+    const usage = usePcBuilderStore((state)=>state.usage)
+    const budget = usePcBuilderStore((state)=>state.budget)
     useGSAP(() => {
         gsap.from(".start-form-child", {
             y: 50,
@@ -54,9 +60,21 @@ export default function PreferencesForm() {
         }
     });
     const onSubmit = (data: PreferencesSchema) => {
-        console.log(data);
-        router.push("/builder/preferences")
-    }
+        setData(data);
+        router.push("/builder/lock-components")
+    };
+    //To prevent users from navigating directly to this path without filling the previous step.
+    useEffect(() => {
+        if (!usePcBuilderStore.persist.hasHydrated()) {
+            return
+        }
+        if (!usage || !budget) {
+            router.push("/builder/start");
+        }
+        if (preferredCPUBrand && preferredGPUBrand && preferredStorage){
+            form.reset({preferredCPUBrand, preferredGPUBrand, preferredStorage})
+        }
+    }, [usage, budget, router, preferredCPUBrand, preferredGPUBrand, preferredStorage, form])
     return (
         <Form {...form}>
             <form

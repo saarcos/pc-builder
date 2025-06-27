@@ -1,5 +1,15 @@
 import { z } from 'zod'
 
+const itemSchema = z.object({
+    _id: z.string(),
+    code: z.string(),
+    componentType: z.string(),
+    image: z.string().url(),
+    lastUpdated: z.string(), 
+    link: z.string().url(),
+    name: z.string(),
+    price: z.string(), 
+});
 export const pcbuilderSchema = z.object({
     usage: z.enum(['gaming', 'render', 'office'], {
         errorMap: () => ({ message: 'Selecciona un propósito válido' })
@@ -22,13 +32,12 @@ export const pcbuilderSchema = z.object({
         invalid_type_error: "Debe ser un número",
     }).min(256, { message: "Mínimo 256 GB" }),
     lockedComponents: z.object({
-        cpu: z.string().optional(),
-        gpu: z.string().optional(),
-        ram: z.string().optional(),
-        storage: z.string().optional(),
-        motherboard: z.string().optional(),
+        cpu: itemSchema.optional(),
+        gpu: itemSchema.optional(),
+        ram: itemSchema.optional(),
+        storage: itemSchema.optional(),
+        motherboard: itemSchema.optional(),
     }),
-
     candidates: z.object({
         cpu: z.array(z.any()),
         gpu: z.array(z.any()),
