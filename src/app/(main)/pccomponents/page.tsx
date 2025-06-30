@@ -25,7 +25,7 @@ export default function Components() {
       try {
         const response = await axios.get('/api/components');
         const data = await response.data;
-        setComponents(data);
+        setComponents(data.data);
       } catch (error) {
         setLoading(false);
         console.error(error);

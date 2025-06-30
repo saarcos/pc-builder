@@ -5,50 +5,25 @@ import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { pcbuilderSchema } from '../schema'
+import { getPreferencesSchema } from '../schema'
 import { z } from 'zod'
 import ComponentCard from './BuildTypeCard'
 import { Slider } from '@/components/ui/slider'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/all'
-import { useGSAP } from '@gsap/react'
 import { usePcBuilderStore } from '@/app/(main)/builder/store'
 import { usePCBuilderData } from '@/hooks/usePcBuilderData'
+import { validateBuildStep2 } from '@/lib/validateBuild'
 gsap.registerPlugin(ScrollTrigger);
 export default function PreferencesForm() {
     const setData = usePcBuilderStore((state) => state.setData);
-    const { preferredCPUBrand, preferredGPUBrand, preferredStorage} = usePCBuilderData();
-    const usage = usePcBuilderStore((state)=>state.usage)
-    const budget = usePcBuilderStore((state)=>state.budget)
-    useGSAP(() => {
-        gsap.from(".start-form-child", {
-            y: 50,
-            autoAlpha: 0,
-            scale: 0.95,
-            duration: 0.8,
-            ease: "power3.out",
-            stagger: 0.15,
-            delay: 0.5,
-        });
-        gsap.from(".scroll-content", {
-            autoAlpha: 0,   // opacity: 0 + visibility: hidden
-            y: 50,          // baja 50px al inicio
-            duration: 1,
-            ease: "power3.out",
-            scrollTrigger: {
-                trigger: ".scroll-content",
-                start: "top 80%",   // cuando el top del elemento está al 80% de la ventana
-                toggleActions: "play none none none", // se ejecuta solo 1 vez
-            },
-        });
-    }, []);
+    const { usage, budget, preferredCPUBrand, preferredGPUBrand, preferredStorage, storageRequirement } = usePCBuilderData();
+    const filteredComponents = usePcBuilderStore((state) => state.filteredComponents);
+    const setFilteredComponents = usePcBuilderStore((state) => state.setFilteredComponents);
+    const hasHydrated = usePcBuilderStore((state) => state.hasHydrated);
     const router = useRouter();
-    const preferencesSchema = pcbuilderSchema.pick({
-        preferredCPUBrand: true,
-        preferredGPUBrand: true,
-        preferredStorage: true,
-        storageRequirement: true,
-    });
+    const hasGPU = !!filteredComponents['video-cards'] && filteredComponents['video-cards'].length > 0;
+    const preferencesSchema = getPreferencesSchema(hasGPU);
     type PreferencesSchema = z.infer<typeof preferencesSchema>;
     const form = useForm<PreferencesSchema>({
         resolver: zodResolver(preferencesSchema),
@@ -60,21 +35,33 @@ export default function PreferencesForm() {
         }
     });
     const onSubmit = (data: PreferencesSchema) => {
+        const payload = {
+            ...data,
+            filteredComponents,
+        }
+        const { valid, filtered, missingComponents } = validateBuildStep2(payload);
+        if (!valid) {
+            alert(`No hay componentes suficientes: ${missingComponents}`);
+            return
+        }
+        console.log(filtered)
+        return
         setData(data);
+        setFilteredComponents(filtered);
         router.push("/builder/lock-components")
     };
     //To prevent users from navigating directly to this path without filling the previous step.
     useEffect(() => {
-        if (!usePcBuilderStore.persist.hasHydrated()) {
+        if (!hasHydrated) {
             return
         }
         if (!usage || !budget) {
             router.push("/builder/start");
         }
-        if (preferredCPUBrand && preferredGPUBrand && preferredStorage){
-            form.reset({preferredCPUBrand, preferredGPUBrand, preferredStorage})
+        if (preferredCPUBrand && preferredGPUBrand && preferredStorage) {
+            form.reset({ preferredCPUBrand, preferredGPUBrand, preferredStorage, storageRequirement })
         }
-    }, [usage, budget, router, preferredCPUBrand, preferredGPUBrand, preferredStorage, form])
+    }, [usage, budget, router, preferredCPUBrand, preferredGPUBrand, preferredStorage, storageRequirement, form, hasHydrated])
     return (
         <Form {...form}>
             <form
@@ -116,7 +103,7 @@ export default function PreferencesForm() {
                         )}
                     />
                 </div>
-                <div className="start-form-child">
+                {filteredComponents['video-cards'] && (<div className="start-form-child">
                     <FormField
                         control={form.control}
                         name="preferredGPUBrand"
@@ -127,15 +114,15 @@ export default function PreferencesForm() {
                                     <ComponentCard
                                         name='Nvidia'
                                         urlPath='/images/nvidia.png'
-                                        selected={field.value === 'nvidia'}
-                                        onClick={() => field.onChange('nvidia')}
+                                        selected={field.value === 'rtx'}
+                                        onClick={() => field.onChange('rtx')}
                                         hasError={fieldState.invalid}
                                     />
                                     <ComponentCard
                                         name='Radeon'
                                         urlPath='/images/radeon.png'
-                                        selected={field.value === 'amd'}
-                                        onClick={() => field.onChange('amd')}
+                                        selected={field.value === 'rx'}
+                                        onClick={() => field.onChange('rx')}
                                         hasError={fieldState.invalid}
                                     />
                                     <ComponentCard
@@ -150,7 +137,7 @@ export default function PreferencesForm() {
                             </FormItem>
                         )}
                     />
-                </div>
+                </div>)}
                 <div className="scroll-content">
                     <FormField
                         control={form.control}
@@ -162,15 +149,15 @@ export default function PreferencesForm() {
                                     <ComponentCard
                                         name='HDD'
                                         urlPath='/images/hdd.png'
-                                        selected={field.value === 'HDD'}
-                                        onClick={() => field.onChange('HDD')}
+                                        selected={field.value === 'hdd'}
+                                        onClick={() => field.onChange('hdd')}
                                         hasError={fieldState.invalid}
                                     />
                                     <ComponentCard
                                         name='SSD'
                                         urlPath='/images/ssd.png'
-                                        selected={field.value === 'SSD'}
-                                        onClick={() => field.onChange('SSD')}
+                                        selected={field.value === 'ssd'}
+                                        onClick={() => field.onChange('ssd')}
                                         hasError={fieldState.invalid}
                                     />
                                 </div>

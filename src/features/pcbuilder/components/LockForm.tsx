@@ -19,15 +19,22 @@ export default function LockForm() {
         preferredGPUBrand,
         preferredStorage,
         storageRequirement,
+        lockedComponentsData
     } = usePCBuilderData();
+    const hasHydrated = usePcBuilderStore((state)=>state.hasHydrated);
+    const filteredComponents = usePcBuilderStore((state)=>state.filteredComponents);
+    console.log(filteredComponents);
     useEffect(() => {
-        if (!usePcBuilderStore.persist.hasHydrated()) {
+        if (!hasHydrated) {
             return
         }
         if (!usage || !budget || !preferredCPUBrand || !preferredGPUBrand || !preferredStorage || !storageRequirement) {
             router.push('/builder/start')
         }
-    }, [usage, budget, preferredCPUBrand, preferredGPUBrand, preferredStorage, storageRequirement, router])
+        if(lockedComponentsData){
+            setLockedComponents(lockedComponentsData);
+        }
+    }, [usage, budget, preferredCPUBrand, preferredGPUBrand, preferredStorage, storageRequirement, lockedComponentsData, router, hasHydrated])
     const [lockedComponents, setLockedComponents] = useState<LockedComponents>({});
     const lockedSchema = pcbuilderSchema.pick({ lockedComponents: true });
 
@@ -45,7 +52,6 @@ export default function LockForm() {
         try {
             const parsed = lockedSchema.parse({ lockedComponents });
             setData(parsed);
-            console.log({ budget, preferredCPUBrand, lockedComponents })
         } catch (e) {
             console.error("Errores de validación:", e);
         }
@@ -73,7 +79,7 @@ export default function LockForm() {
                     onClick={onSubmit}
                     className='px-8 py-5 cursor-pointer bg-transparent border-2 border-emerald-400 shadow-[0px_0px_5px_#22c55e] hover:shadow-[0px_0px_10px_#22c55e] hover:bg-transparent font-pressstart'
                 >
-                    Siguiente
+                    Generar Build
                 </Button>
             </div>
         </div>

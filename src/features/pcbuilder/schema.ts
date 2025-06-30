@@ -5,13 +5,15 @@ const itemSchema = z.object({
     code: z.string(),
     componentType: z.string(),
     image: z.string().url(),
-    lastUpdated: z.string(), 
+    lastUpdated: z.string(),
     link: z.string().url(),
     name: z.string(),
-    price: z.string(), 
+    price: z.number(),
 });
+
+
 export const pcbuilderSchema = z.object({
-    usage: z.enum(['gaming', 'render', 'office'], {
+    usage: z.enum(['gaming', 'render', 'office', 'office-integrated', 'office-dedicated'], {
         errorMap: () => ({ message: 'Selecciona un propósito válido' })
     }),
     budget: z.string({
@@ -24,9 +26,13 @@ export const pcbuilderSchema = z.object({
         .refine((val) => Number(val) >= 400, {
             message: "El presupuesto no puede ser menor a 400"
         }),
-    preferredCPUBrand: z.enum(['intel', 'amd', 'any']),
-    preferredGPUBrand: z.enum(['nvidia', 'amd', 'any']),
-    preferredStorage: z.enum(['HDD', 'SSD']),
+    preferredCPUBrand: z.enum(['intel', 'amd', 'any'], {
+        errorMap: () => ({ message: 'Por favor, selecciona una preferencia' })
+    }),
+    preferredGPUBrand: z.enum(['rtx', 'rx', 'any']).optional(),
+    preferredStorage: z.enum(['hdd', 'ssd'], {
+        errorMap: () => ({message: 'Por favor, selecciona una preferencia'})
+    }),
     storageRequirement: z.number({
         required_error: "El almacenamiento es obligatorio",
         invalid_type_error: "Debe ser un número",
@@ -46,4 +52,20 @@ export const pcbuilderSchema = z.object({
         motherboard: z.array(z.any()),
     })
 });
+export function getPreferencesSchema(hasGPU: boolean) {
+  return z.object({
+    preferredCPUBrand: z.enum(['intel', 'amd', 'any'], {
+      errorMap: () => ({ message: 'Selecciona una opción' })
+    }),
+    preferredGPUBrand: hasGPU
+      ? z.enum(['rtx', 'rx', 'any'], {
+          errorMap: () => ({ message: 'Selecciona una opción' })
+        })
+      : z.enum(['rtx', 'rx', 'any']).optional(),
+    preferredStorage: z.enum(['hdd', 'ssd'], {
+      errorMap: () => ({ message: 'Selecciona una opción' })
+    }),
+    storageRequirement: z.number().min(256, { message: "Mínimo 256 GB" }),
+  });
+}
 export type PCBuilderSchema = z.infer<typeof pcbuilderSchema>

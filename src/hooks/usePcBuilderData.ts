@@ -7,7 +7,7 @@ export function usePCBuilderData() {
   const preferredGPUBrand = usePcBuilderStore((state) => state.preferredGPUBrand);
   const preferredStorage = usePcBuilderStore((state) => state.preferredStorage);
   const storageRequirement = usePcBuilderStore((state) => state.storageRequirement);
-  const lockedComponents = usePcBuilderStore((state) => state.lockedComponents);
+  const lockedComponentsData = usePcBuilderStore((state) => state.lockedComponents);
 
   return {
     usage,
@@ -16,6 +16,6 @@ export function usePCBuilderData() {
     preferredGPUBrand,
     preferredStorage,
     storageRequirement,
-    lockedComponents,
+    lockedComponentsData,
   };
 }

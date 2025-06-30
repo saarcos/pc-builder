@@ -8,9 +8,8 @@ export async function GET(req: NextRequest) {
 
         const componentType = searchParams.get('componentType');
         const search = searchParams.get('search') || '';
-        const page = parseInt(searchParams.get('page') || '1', 10);
-        const limit = parseInt(searchParams.get('limit') || '12', 10);
-        const skip = (page - 1) * limit;
+        const pageParam = searchParams.get('page');
+        const limitParam = searchParams.get('limit');
 
         const query: Record<string, unknown> = {};
 
@@ -22,14 +21,25 @@ export async function GET(req: NextRequest) {
             query.name = { $regex: search, $options: 'i' };
         }
 
-        const components = await db
-            .collection('components')
-            .find(query)
-            .skip(skip)
-            .limit(limit)
-            .toArray();
+        const collection = db.collection('components');
 
-        const total = await db.collection('components').countDocuments(query);
+        // Si no se pasa paginación explícita o se pide "all"
+        if (!pageParam || !limitParam || limitParam === 'all') {
+            const components = await collection.find(query).toArray();
+            return NextResponse.json({
+                data: components,
+                total: components.length,
+                page: 1,
+                totalPages: 1,
+            });
+        }
+
+        const page = parseInt(pageParam, 10);
+        const limit = parseInt(limitParam, 10);
+        const skip = (page - 1) * limit;
+
+        const components = await collection.find(query).skip(skip).limit(limit).toArray();
+        const total = await collection.countDocuments(query);
 
         return NextResponse.json({
             data: components,

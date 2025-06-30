@@ -5,52 +5,103 @@ import { Input } from '@/components/ui/input';
 import { pcbuilderSchema } from '@/features/pcbuilder/schema'
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
 import ComponentCard from './BuildTypeCard';
 import { usePcBuilderStore } from '@/app/(main)/builder/store';
 import { usePCBuilderData } from '@/hooks/usePcBuilderData';
+import axios from 'axios';
+import { Item } from '@/app/types/pc-builder';
+import { validateBuildStep1 } from '@/lib/validateBuild';
 const purposeSchema = pcbuilderSchema.pick({
     usage: true,
     budget: true,
-});
+}).extend({
+    officeGraphicsType: z.enum(['integrated', 'dedicated']).optional(),
+}).refine(
+    (data) => {
+        if (data.usage === 'office') {
+            return !!data.officeGraphicsType;
+        }
+        return true;
+    },
+    {
+        message: "Debes seleccionar si necesitas gráficos integrados o dedicados",
+        path: ["officeGraphicsType"],
+    }
+);
 type PurposeSchema = z.infer<typeof purposeSchema>
 export default function StartForm() {
     const setData = usePcBuilderStore((state) => state.setData);
+    const setFilteredComponents = usePcBuilderStore((state) => state.setFilteredComponents);
     const { usage, budget } = usePCBuilderData();
-
-    useGSAP(() => {
-        gsap.from(".start-form-child", {
-            y: 50,
-            autoAlpha: 0,
-            scale: 0.95,
-            duration: 0.8,
-            ease: "power3.out",
-            stagger: 0.15,
-            delay: 0.5,
-        });
-    }, []);
+    const [components, setComponents] = useState<Item[]>([]);
+    const hasHydrated = usePcBuilderStore((state) => state.hasHydrated);
+    
+    useEffect(() => {
+        const fetchComponents = async () => {
+            try {
+                const response = await axios.get('/api/components');
+                const data = await response.data;
+                setComponents(data.data)
+            } catch (error) {
+                console.error(error)
+            }
+        }
+        fetchComponents();
+    }, [])
     const router = useRouter();
     const form = useForm<PurposeSchema>({
         resolver: zodResolver(purposeSchema),
         defaultValues: {
             usage: undefined,
             budget: "",
+            officeGraphicsType: undefined
         }
     });
     const onSubmit = (data: PurposeSchema) => {
-        setData(data);
-        router.push("/builder/preferences")
+        const finalUsage = data.usage === 'office'
+            ? data.officeGraphicsType === 'integrated'
+                ? 'office-integrated'
+                : 'office-dedicated'
+            : data.usage;
+        const payload = {
+            usage: finalUsage,
+            budget: Number(data.budget),
+            components
+        }
+        const { valid, missingComponents, filtered } = validateBuildStep1(payload);
+        if (!valid) {
+            alert(`Con el propósito y presupuesto establecido no existen componentes que satisfagan tus requerimientos, faltan: ${missingComponents}`);
+            return;
+        }
+        setData({ ...data, usage: finalUsage });
+        setFilteredComponents(filtered);
+        router.push("/builder/preferences");
     };
     useEffect(() => {
-        if (!usePcBuilderStore.persist.hasHydrated()) return
-        if (usage || budget) {
-            form.reset({ usage, budget: budget ?? "" });
+        if (!hasHydrated) return;
+
+        if (!usage || !budget) return;
+
+        if (usage === 'office-integrated') {
+            form.reset({
+                usage: 'office',
+                officeGraphicsType: 'integrated',
+                budget
+            });
+        } else if (usage === 'office-dedicated') {
+            form.reset({
+                usage: 'office',
+                officeGraphicsType: 'dedicated',
+                budget
+            });
+        } else {
+            form.reset({ usage, budget });
         }
-    }, [budget, usage, form])
+    }, [budget, usage, form, hasHydrated]);
+
     return (
         <Form {...form}>
             <form
@@ -92,6 +143,36 @@ export default function StartForm() {
                         )}
                     />
                 </div>
+                {form.watch('usage') === 'office' && (
+                    <div className="start-form-child">
+                        <FormField
+                            control={form.control}
+                            name="officeGraphicsType"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className='text-xl font-semibold mb-4 text-white drop-shadow-[0px_0px_5px_#22c55e]'>¿Qué tipo de gráficos necesitas?</FormLabel>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <ComponentCard
+                                            name="Integrados"
+                                            urlPath="/images/integrated.webp"
+                                            selected={field.value === 'integrated'}
+                                            onClick={() => field.onChange('integrated')}
+                                            hasError={false}
+                                        />
+                                        <ComponentCard
+                                            name="Dedicados"
+                                            urlPath="/images/dedicated.png"
+                                            selected={field.value === 'dedicated'}
+                                            onClick={() => field.onChange('dedicated')}
+                                            hasError={false}
+                                        />
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                )}
                 <div className="start-form-child">
                     <FormField
                         control={form.control}

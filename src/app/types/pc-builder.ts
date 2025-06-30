@@ -6,7 +6,8 @@ export type Item = {
     lastUpdated: string,
     link: string,
     name: string,
-    price: string,
+    price: number,
+        
 }
 export type Component = {
     name: string,
