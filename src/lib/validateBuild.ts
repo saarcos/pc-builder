@@ -1,4 +1,4 @@
-import { Item } from "@/app/types/pc-builder";
+import { Item, LockedComponents } from "@/app/types/pc-builder";
 import { buildTemplates } from "./templates";
 type StorageType = 'ssd' | 'hdd';
 type CPUBrand = 'intel' | 'amd' | 'any';
@@ -15,6 +15,10 @@ type Step2InputValidation = {
     preferredGPUBrand?: GPUBrand,
     preferredStorage: StorageType,
     storageRequirement: number,
+}
+type Step3InputValidation = {
+    filteredComponents: Record<string, Item[]>,
+    lockedComponents: LockedComponents
 }
 type ValidationResult = {
     valid: boolean;
@@ -86,16 +90,13 @@ export function validateBuildStep2({
     const filtered: Record<string, Item[]> = filteredComponents;
     const missingComponents: string[] = [];
 
-
     // CPU
-    console.log(preferredCPUBrand)
     let cpuPool = filteredComponents['processors'] || [];
     if (preferredCPUBrand !== 'any') {
         cpuPool = cpuPool.filter((cpu) => nameCleaner(cpu.name).includes(preferredCPUBrand));
     }
     if (cpuPool.length === 0) missingComponents.push('processors');
     else filtered['processors'] = cpuPool;
-    console.log(cpuPool)
 
     // GPU
     let gpuPool = filteredComponents['video-cards'] || [];
@@ -128,6 +129,20 @@ export function validateBuildStep2({
         missingComponents,
         filtered,
     };
+};
+
+export function validateBuildStep3({ filteredComponents, lockedComponents }: Step3InputValidation): Partial<ValidationResult> {
+    const filtered: Record<string, Item[]> = { ...filteredComponents };
+
+    for (const key of Object.keys(lockedComponents) as (keyof typeof lockedComponents)[]) {
+        const locked = lockedComponents[key];
+        console.log(key)
+        if (locked) {
+            filtered[key] = [locked];
+        }
+    }
+    console.log("filtered: ",filtered);
+    return {};
 }
 
 function groupByType(components: Item[]) {

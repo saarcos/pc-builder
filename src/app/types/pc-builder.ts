@@ -7,16 +7,15 @@ export type Item = {
     link: string,
     name: string,
     price: number,
-        
 }
 export type Component = {
     name: string,
     componentType: string,
 }
 export type LockedComponents = {
-    cpu?: Item;
-    gpu?: Item;
-    ram?: Item;
-    storage?: Item;
-    motherboard?: Item;
+    processors?: Item;
+    "video-cards"?: Item;
+    memory?: Item;
+    "hard-drives"?: Item;
+    motherboards?: Item;
 };

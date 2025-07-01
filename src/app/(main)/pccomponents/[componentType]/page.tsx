@@ -15,15 +15,17 @@ export type Component = {
   name: string,
   price: string,
 }
-export default function Components() {
+
+export default function ComponentType({ params }: { params: Promise<{ componentType: string }> }) {
   const [components, setComponents] = useState<Component[]>();
   const [loading, setLoading] = useState<boolean>(false);
   const loaderRef = useRef(null);
+  const { componentType } = React.use(params);
   useEffect(() => {
     const fetchComponents = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('/api/components');
+        const response = await axios.get(`/api/components?componentType=${componentType}`);
         const data = await response.data;
         setComponents(data.data);
       } catch (error) {
@@ -34,7 +36,7 @@ export default function Components() {
       }
     }
     fetchComponents();
-  }, []);
+  }, [componentType]);
   useGSAP(() => {
     if (loading && loaderRef.current) {
       gsap.fromTo(

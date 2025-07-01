@@ -1,6 +1,6 @@
 "use client"
-import React, { useRef, useState } from "react"
-import { navLinks } from "../../constants"
+import React, { useEffect, useRef, useState } from "react"
+import { componentLinks, navLinks } from "../../constants"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
@@ -8,12 +8,16 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs"
 import { ScrollTrigger } from "gsap/all"
 import gsap from "gsap"
 import { useGSAP } from "@gsap/react"
+import Image from "next/image"
 gsap.registerPlugin(ScrollTrigger);
 export default function Navbar() {
   const pathname = usePathname()
   const isActive = (path: string) => path === pathname
   const [isOpen, setIsOpen] = useState(false);
+  const [componentsOpen, setComponentsOpen] = useState(false);
   const navbarRef = useRef(null);
+  const componentsRef = useRef<HTMLDivElement>(null);
+
   useGSAP(() => {
     const nav = navbarRef.current;
 
@@ -40,6 +44,21 @@ export default function Navbar() {
       },
     });
   }, []);
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        componentsRef.current &&
+        !componentsRef.current.contains(event.target as Node)
+      ) {
+        setComponentsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [])
   return (
     <nav
       ref={navbarRef}
@@ -65,6 +84,41 @@ export default function Navbar() {
               {link.title}
             </Link>
           ))}
+          <div className="relative group" ref={componentsRef}>
+            <button
+              onClick={() => setComponentsOpen(!componentsOpen)}
+              className={`transition duration-300 text-lg font-semibold cursor-pointer ${isActive("/pccomponents")
+                ? "text-white drop-shadow-[0_0_4px_#22c55e]"
+                : "opacity-60 group-hover:opacity-100"
+                }`}
+            >
+              Componentes
+            </button>
+            {componentsOpen && (
+              <div className="absolute top-10 left-1/2 -translate-x-1/2 z-40 bg-[#0f0f0fcc] border border-emerald-500/20 shadow-lg rounded-lg p-4 w-[320px] sm:w-[500px] backdrop-blur-md transition">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {componentLinks.map((component) => (
+                    <Link
+                      onClick={()=>setComponentsOpen(false)}
+                      key={component.id}
+                      href={component.path}
+                      className="flex flex-col items-center text-center text-white hover:text-emerald-300 transition"
+                    >
+                      <Image
+                        src={component.image}
+                        alt={component.title}
+                        width={80}
+                        height={80}
+                        className="object-contain mb-1"
+                      />
+                      <p className="text-sm font-medium">{component.title}</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <SignedOut>
             <SignInButton>
               <button className="border border-[#22c55e] shadow-[0_0_5px_#22c55e] hover:shadow-[0_0_10px_#22c55e] text-white text-lg px-4 py-1 rounded-md transition cursor-pointer font-inter">

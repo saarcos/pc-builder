@@ -7,7 +7,7 @@ import { usePcBuilderStore } from '@/app/(main)/builder/store';
 import { pcbuilderSchema } from '../schema';
 import { usePCBuilderData } from '@/hooks/usePcBuilderData';
 import { useRouter } from 'next/navigation';
-
+import { validateBuildStep3 } from '@/lib/validateBuild';
 
 export default function LockForm() {
     const router = useRouter();
@@ -23,7 +23,6 @@ export default function LockForm() {
     } = usePCBuilderData();
     const hasHydrated = usePcBuilderStore((state)=>state.hasHydrated);
     const filteredComponents = usePcBuilderStore((state)=>state.filteredComponents);
-    console.log(filteredComponents);
     useEffect(() => {
         if (!hasHydrated) {
             return
@@ -34,7 +33,7 @@ export default function LockForm() {
         if(lockedComponentsData){
             setLockedComponents(lockedComponentsData);
         }
-    }, [usage, budget, preferredCPUBrand, preferredGPUBrand, preferredStorage, storageRequirement, lockedComponentsData, router, hasHydrated])
+    }, [usage, budget, preferredCPUBrand, preferredGPUBrand, preferredStorage, storageRequirement, lockedComponentsData, router, hasHydrated, filteredComponents])
     const [lockedComponents, setLockedComponents] = useState<LockedComponents>({});
     const lockedSchema = pcbuilderSchema.pick({ lockedComponents: true });
 
@@ -51,6 +50,8 @@ export default function LockForm() {
     const onSubmit = () => {
         try {
             const parsed = lockedSchema.parse({ lockedComponents });
+            validateBuildStep3({filteredComponents, lockedComponents})
+            return;
             setData(parsed);
         } catch (e) {
             console.error("Errores de validación:", e);
@@ -71,7 +72,7 @@ export default function LockForm() {
                     Componentes a fijar
                 </div>
                 {[{ name: 'cpu', componentType: 'processors' }, { name: 'gpu', componentType: 'video-cards' }, { name: 'motherboard', componentType: 'motherboards' }, { name: 'storage', componentType: 'hard-drives' }].map((component, index) => (
-                    <ComponentContainer key={index} component={component} onSelect={handleSelect} onDelete={handleDeleteComponent} lockedValue={lockedComponents[component.name as keyof LockedComponents]} />
+                    <ComponentContainer key={index} component={component} onSelect={handleSelect} onDelete={handleDeleteComponent} lockedValue={lockedComponents[component.name as keyof LockedComponents]} filteredItems = {filteredComponents[component.componentType] || []}/>
                 ))}
             </div>
             <div className='flex items-center justify-center mt-5 start-form-child'>

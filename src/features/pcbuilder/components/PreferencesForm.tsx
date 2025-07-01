@@ -44,8 +44,6 @@ export default function PreferencesForm() {
             alert(`No hay componentes suficientes: ${missingComponents}`);
             return
         }
-        console.log(filtered)
-        return
         setData(data);
         setFilteredComponents(filtered);
         router.push("/builder/lock-components")

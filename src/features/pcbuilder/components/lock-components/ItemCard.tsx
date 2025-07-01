@@ -2,16 +2,17 @@ import React from 'react'
 import Image from 'next/image'
 import { Plus, Check } from 'lucide-react'
 import { Item } from '@/app/types/pc-builder';
+import { LockedComponentType } from './ComponentContainer';
 
 type Props = {
     item: Item,
-    onSelect: (type: "cpu" | "gpu" | "ram" | "storage" | "motherboard", component: Item) => void;
-    componentName: "cpu" | "gpu" | "ram" | "storage" | "motherboard";
+    onSelect: (type: LockedComponentType, component: Item) => void;
+    componentType: LockedComponentType;
     setOpen: React.Dispatch<React.SetStateAction<boolean>>;
     isLocked: boolean,
 }
 
-export default function ItemCard({ item, onSelect, componentName, setOpen, isLocked }: Props) {
+export default function ItemCard({ item, onSelect, componentType, setOpen, isLocked }: Props) {
     return (
         <div className={`flex flex-col p-3 rounded-xl text-white shadow-md transition-shadow
             ${isLocked
@@ -30,7 +31,7 @@ export default function ItemCard({ item, onSelect, componentName, setOpen, isLoc
 
             <div className='flex flex-col gap-1 mt-3'>
                 <h3 className='capitalize text-xs font-semibold leading-snug line-clamp-2'>{item.name}</h3>
-                <p className='text-emerald-400 text-sm'>{item.price}</p>
+                <p className='text-emerald-400 text-sm'>${item.price}</p>
                 <a
                     href={item.link}
                     target="_blank"
@@ -44,7 +45,8 @@ export default function ItemCard({ item, onSelect, componentName, setOpen, isLoc
             <button
                 onClick={() => {
                     if (!isLocked) {
-                        onSelect(componentName, item);
+                        console.log(componentType)
+                        onSelect(componentType, item);
                         setOpen(false);
                     }
                 }}

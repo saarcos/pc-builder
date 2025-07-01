@@ -38,11 +38,11 @@ export const pcbuilderSchema = z.object({
         invalid_type_error: "Debe ser un número",
     }).min(256, { message: "Mínimo 256 GB" }),
     lockedComponents: z.object({
-        cpu: itemSchema.optional(),
-        gpu: itemSchema.optional(),
-        ram: itemSchema.optional(),
-        storage: itemSchema.optional(),
-        motherboard: itemSchema.optional(),
+        "processors": itemSchema.optional(),
+        "video-cards": itemSchema.optional(),
+        "memory": itemSchema.optional(),
+        "hard-drives": itemSchema.optional(),
+        "motherboards": itemSchema.optional(),
     }),
     candidates: z.object({
         cpu: z.array(z.any()),
