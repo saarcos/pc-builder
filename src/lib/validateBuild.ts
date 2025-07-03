@@ -136,13 +136,11 @@ export function validateBuildStep3({ filteredComponents, lockedComponents }: Ste
 
     for (const key of Object.keys(lockedComponents) as (keyof typeof lockedComponents)[]) {
         const locked = lockedComponents[key];
-        console.log(key)
         if (locked) {
             filtered[key] = [locked];
         }
     }
-    console.log("filtered: ",filtered);
-    return {};
+    return {filtered};
 }
 
 function groupByType(components: Item[]) {

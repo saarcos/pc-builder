@@ -62,7 +62,7 @@ export default function ComponentContainer({ component, onSelect, lockedValue, o
                             </div>
                         </div>
                         <button
-                            onClick={() => onDelete(component.name as LockedComponentType)}
+                            onClick={() => onDelete(component.componentType as LockedComponentType)}
                             className='cursor-pointer p-2 rounded-full hover:bg-emerald-700/30 transition-colors text-emerald-300 hover:text-emerald-300/60'
                             aria-label="Quitar componente"
                         >

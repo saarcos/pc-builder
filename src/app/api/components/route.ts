@@ -1,4 +1,5 @@
 import { getDb } from "@/lib/mongodb"
+import { ObjectId } from "mongodb";
 import { NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest) {
@@ -8,9 +9,9 @@ export async function GET(req: NextRequest) {
 
         const componentType = searchParams.get('componentType');
         const search = searchParams.get('search') || '';
+        const sort = searchParams.get('sort'); // 'asc' o 'desc
         const pageParam = searchParams.get('page');
         const limitParam = searchParams.get('limit');
-
         const query: Record<string, unknown> = {};
 
         if (componentType) {
@@ -22,6 +23,12 @@ export async function GET(req: NextRequest) {
         }
 
         const collection = db.collection('components');
+        const sortOptions: Record<string, 1 | -1> = {};
+        if (sort === 'asc') {
+            sortOptions.price = 1;
+        } else if (sort === 'desc') {
+            sortOptions.price = -1;
+        }
 
         // Si no se pasa paginación explícita o se pide "all"
         if (!pageParam || !limitParam || limitParam === 'all') {
@@ -38,7 +45,7 @@ export async function GET(req: NextRequest) {
         const limit = parseInt(limitParam, 10);
         const skip = (page - 1) * limit;
 
-        const components = await collection.find(query).skip(skip).limit(limit).toArray();
+        const components = await collection.find(query).sort(sortOptions).skip(skip).limit(limit).toArray();
         const total = await collection.countDocuments(query);
 
         return NextResponse.json({
@@ -53,5 +60,23 @@ export async function GET(req: NextRequest) {
             { message: 'Error al obtener productos' },
             { status: 500 }
         );
+    }
+}
+export async function DELETE(req: NextRequest) {
+    try {
+        const db = await getDb();
+        const { searchParams } = new URL(req.url);
+        const id = searchParams.get('id');
+        if (!id) {
+            return NextResponse.json({ message: "Falta el parámetro 'id'" }, { status: 400 });
+        }
+        const result = await db.collection('components').deleteOne({ _id: new ObjectId(id) });
+        if (result.deletedCount === 0) {
+            return NextResponse.json({ message: "No se encontró el componente con ese ID" }, { status: 404 });
+        }
+        return NextResponse.json({ message: "Componente eliminado exitosamente" });
+    } catch (error) {
+        console.error("Error al eliminar componente:", error);
+        return NextResponse.json({ message: "Error al eliminar componente" }, { status: 500 });
     }
 }
