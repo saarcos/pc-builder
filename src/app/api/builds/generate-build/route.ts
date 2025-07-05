@@ -60,16 +60,20 @@ export async function POST(req: NextRequest) {
         const availableComponents = transformAvailableComponents(rawComponents);
 
         const prompt = `
-            You are a PC building assistant AI. Your job is to generate a compatible PC build based on the user's goals and available components.
+            You are a PC building assistant AI. Your job is to generate a compatible and optimized PC build based on the user's goals and the list of available components.
 
             Constraints:
             - Only select components from the provided list.
-            - The build must be compatible (CPU matches motherboard socket, PSU has enough power, etc.).
-            - Respect the user's budget: $${budget} total. Do not exceed it unless it's completely necessary.
-            - If there are no available video cards, do not add a random one.
-            - Only add a cooler if there is enough budget available. Prioritize the other components instead.
-            - Storage must meet at least ${storageRequirement} TB.
-            - Optimize for this usage: ${usage} (e.g., gaming, office, rendering, etc.).
+            - The build must be fully compatible:
+                - CPU must match the motherboard socket.
+                - PSU must provide sufficient power for all components.
+            - Respect the user's total budget: $${budget}. Do **not** exceed this amount.
+            - At the same time, aim to **maximize the quality and performance of the components** while **minimizing unused budget**. Avoid builds that leave a large portion of the budget unspent when better parts are available.
+            - If there are no available video cards, do not include one.
+            - Only add a cooler if there's remaining budget after selecting the essential components.
+            - Storage must meet at least ${storageRequirement} GB.
+            - Optimize the component selection for this usage: ${usage} (e.g., gaming, office, rendering, etc.).
+            - If the usage is office-dedicated it means that we need to add a video card
             - Use only the provided IDs and names for each component.
 
             Available components (each one has id, name, and price):

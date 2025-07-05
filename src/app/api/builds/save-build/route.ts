@@ -18,6 +18,8 @@ const componentSnapshotSchema = z.object({
     link: z.string().url()
 });
 const buildSchema = z.object({
+    userId: z.string().min(1),
+    name: z.string().min(1),
     usage: z.string().min(1),
     budget: z.number().positive(),
     totalPrice: z.number().positive(),
@@ -27,7 +29,6 @@ export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const parsed = buildSchema.parse(body);
-
         const db = await getDb();
         const result = await db.collection("builds").insertOne({
             ...parsed,

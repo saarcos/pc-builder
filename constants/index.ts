@@ -11,7 +11,7 @@ export const navLinks = [
     },
     {
         id: 'builds',
-        title: 'Mis creaciones',
+        title: 'Mis builds',
         path: '/builds'
     },
 ]

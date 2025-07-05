@@ -63,7 +63,7 @@ export default function LockForm() {
                 storageRequirement,
                 rawComponents: filtered
             };
-            const response = await axios.post('/api/generate-build', payload);
+            const response = await axios.post('/api/builds/generate-build', payload);
             console.log('Build generated: ', response.data);
             localStorage.setItem('generatedBuild', JSON.stringify(response.data));
             router.push('/builder/preview')
