@@ -9,6 +9,7 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { Dialog, DialogHeader, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { useUser } from '@clerk/nextjs'
+import { toast } from 'sonner'
 
 type SavedComponent = {
     type: keyof BuildAI,
@@ -104,7 +105,14 @@ export default function Preview() {
             const response = await axios.post('/api/builds/save-build', buildData);
 
             if (response.status === 201) {
-                alert("Build guardada exitosamente 🎉");
+                toast.success("Build guardada exitosamente 🎉", {
+                    description: "Puedes verla en la pestaña de Builds.",
+                    duration: 4000,
+                    action: {
+                        label: "Ver",
+                        onClick: () => router.push("/builds"),
+                    },
+                });
                 localStorage.removeItem("generatedBuild");
                 localStorage.removeItem("pc-builder-storage");
                 router.push('/builds')
@@ -115,7 +123,10 @@ export default function Preview() {
             }
         } catch (error) {
             console.error("Error al guardar la build:", error);
-            alert("Error inesperado al guardar la build.");
+            toast.error("No se pudo guardar la build 😞", {
+                description: "Revisa tu conexión o intenta de nuevo.",
+                duration: 5000,
+            });
         } finally {
             setSaving(false);
         }
@@ -191,7 +202,7 @@ export default function Preview() {
                     </div>
                     <div className="bg-emerald-950/20 border border-emerald-500/10 backdrop-blur-sm rounded-2xl px-6 py-6 w-full sm:w-80 shadow-lg flex flex-col gap-6">
                         <div className="flex flex-col gap-3">
-                            <button onClick={()=>router.push('/builder')} className="cursor-pointer w-full p-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 transition-colors text-white font-semibold text-sm flex items-center gap-2 justify-center shadow-md">
+                            <button onClick={() => router.push('/builder')} className="cursor-pointer w-full p-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 transition-colors text-white font-semibold text-sm flex items-center gap-2 justify-center shadow-md">
                                 <Plus className="w-5 h-5" />
                                 Generar otra build
                             </button>

@@ -14,11 +14,6 @@ export const navLinks = [
         title: 'Mis builds',
         path: '/builds'
     },
-    {
-        id: 'scraping',
-        title: 'Scraper',
-        path: "/scraping"
-    }
 ]
 export const componentLinks = [
     {

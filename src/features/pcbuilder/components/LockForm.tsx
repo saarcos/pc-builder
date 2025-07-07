@@ -9,6 +9,7 @@ import { usePCBuilderData } from '@/hooks/usePcBuilderData';
 import { useRouter } from 'next/navigation';
 import { validateBuildStep3 } from '@/lib/validateBuild';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 export default function LockForm() {
     const router = useRouter();
@@ -48,7 +49,7 @@ export default function LockForm() {
             return updated;
         });
     };
-    const onSubmit = async() => {
+    const onSubmit = async () => {
         try {
             setLoading(true);
             const parsed = lockedSchema.parse({ lockedComponents });
@@ -64,14 +65,18 @@ export default function LockForm() {
                 rawComponents: filtered
             };
             const response = await axios.post('/api/builds/generate-build', payload);
-            console.log('Build generated: ', response.data);
             localStorage.setItem('generatedBuild', JSON.stringify(response.data));
+            localStorage.removeItem('pc-builder-storage');
             router.push('/builder/preview')
 
         } catch (e) {
             console.error("Errores de validación:", e);
+            toast.error("No se pudo crear la build 😞", {
+                description: "Revisa tu conexión o intenta de nuevo.",
+                duration: 5000,
+            });
             setLoading(false);
-        }finally{
+        } finally {
             setLoading(false);
         }
     };
@@ -80,6 +85,8 @@ export default function LockForm() {
         'video-cards': 'gpu',
         'motherboards': 'motherboard',
         'hard-drives': 'storage',
+        'memory': 'ram',
+        'power-supplies': 'power-supply'
     }
     return (
         <div className='font-inter text-white'>
@@ -118,7 +125,7 @@ export default function LockForm() {
                     onClick={onSubmit}
                     className='px-8 py-5 cursor-pointer bg-transparent border-2 border-emerald-400 shadow-[0px_0px_5px_#22c55e] hover:shadow-[0px_0px_10px_#22c55e] hover:bg-transparent font-pressstart'
                 >
-                    {loading ? 'Generando...': 'Generar build'}
+                    {loading ? 'Generando...' : 'Generar build'}
                 </Button>
             </div>
         </div>

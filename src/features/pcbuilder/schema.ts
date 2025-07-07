@@ -43,6 +43,7 @@ export const pcbuilderSchema = z.object({
         "memory": itemSchema.optional(),
         "hard-drives": itemSchema.optional(),
         "motherboards": itemSchema.optional(),
+        "power-supplies": itemSchema.optional(),
     })
 });
 export function getPreferencesSchema(hasGPU: boolean) {

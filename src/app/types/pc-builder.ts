@@ -18,6 +18,7 @@ export type LockedComponents = {
   memory?: Item;
   "hard-drives"?: Item;
   motherboards?: Item;
+  "power-supplies"?:Item
 };
 type ComponentType = {
   type: string,
