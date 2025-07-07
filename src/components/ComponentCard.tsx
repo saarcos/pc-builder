@@ -15,9 +15,10 @@ import { Button } from './ui/button';
 type Props = {
   component: Component;
   onDelete: (id: string) => void;
+  canDelete: boolean,
 };
 
-export default function ComponentCard({ component, onDelete }: Props) {
+export default function ComponentCard({ component, onDelete, canDelete }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const confirmComponentRemoval = () => {
@@ -48,13 +49,15 @@ export default function ComponentCard({ component, onDelete }: Props) {
           >
             Ver más detalles
           </a>
+          {canDelete &&
+            <DialogTrigger asChild>
+              <button className="mt-3 flex items-center justify-center gap-2 rounded-md bg-emerald-800/60 hover:bg-emerald-700/80 px-4 py-2 text-sm text-emerald-200 hover:text-white transition-all cursor-pointer">
+                <Trash className="w-4 h-4" />
+                <span>Eliminar</span>
+              </button>
+            </DialogTrigger>
+          }
 
-          <DialogTrigger asChild>
-            <button className="mt-3 flex items-center justify-center gap-2 rounded-md bg-emerald-800/60 hover:bg-emerald-700/80 px-4 py-2 text-sm text-emerald-200 hover:text-white transition-all cursor-pointer">
-              <Trash className="w-4 h-4" />
-              <span>Eliminar</span>
-            </button>
-          </DialogTrigger>
         </div>
       </div>
 

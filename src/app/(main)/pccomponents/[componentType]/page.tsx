@@ -3,6 +3,7 @@ import ComponentCard from '@/components/ComponentCard';
 import Loading from '@/components/Loading';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useUser } from '@clerk/nextjs';
 import axios from 'axios';
 import { ArrowDownUp, Search } from 'lucide-react';
 import React, { startTransition, useEffect, useState } from 'react'
@@ -27,7 +28,8 @@ export default function ComponentType({ params }: { params: Promise<{ componentT
   const [searchTerm, setSearchTerm] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [sortOption, setSortOption] = useState('asc');
-
+  const { user } = useUser();
+  const isAdmin = user?.publicMetadata.role==='admin';
   const removeComponentById = async (id: string) => {
     const previousComponents = components;
     startTransition(() => {
@@ -60,10 +62,10 @@ export default function ComponentType({ params }: { params: Promise<{ componentT
     }
     fetchComponents();
   }, [componentType, pageNumber, searchTerm, sortOption]);
-  
+
   if (loading) {
     return (
-      <Loading/>
+      <Loading />
     );
   }
   return (
@@ -119,7 +121,7 @@ export default function ComponentType({ params }: { params: Promise<{ componentT
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 px-4">
         {components && components.length > 0 ? components.map((component) => (
-          <ComponentCard key={component._id} component={component} onDelete={removeComponentById} />
+          <ComponentCard key={component._id} component={component} onDelete={removeComponentById} canDelete={isAdmin} />
         )) : null}
       </div>
       <Pagination className="mt-6">
