@@ -70,10 +70,10 @@ export default function Preview() {
     if (!build) return <div className="text-white p-6">No se encontró ninguna build generada.</div>;
 
     const savedComponents: SavedComponent[] = Object.entries(build)
-        .filter(([_, comp]) => comp) // eliminar campos undefined como `videoCard` o `cooler`
+        .filter(([, comp]) => comp)
         .map(([key, comp]) => ({
             type: key as keyof BuildAI,
-            data: componentsData[comp!.id], // snapshot del componente
+            data: componentsData[comp!.id],
         }));
     const saveBuild = async () => {
         try {
